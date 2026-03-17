@@ -148,14 +148,21 @@ const cssText = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     background: var(--bg-secondary);
     border-radius: 10px;
-    padding: 0.75rem 0.5rem;
-    min-height: 80px;
+    padding: 0.6rem 0.4rem;
+    min-height: 64px;
     text-decoration: none;
     transition: transform 0.15s, box-shadow 0.15s;
     cursor: pointer;
+  }
+  @media (min-width: 1200px) {
+    .ql-tile {
+      padding: 0.75rem 0.5rem;
+      min-height: 80px;
+      gap: 0.4rem;
+    }
   }
   .ql-tile:hover {
     transform: translateY(-2px);

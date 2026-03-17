@@ -190,7 +190,7 @@ const cssText = `
     color: var(--bg-primary);
   }
   .nf-scroll-area {
-    max-height: 480px;
+    max-height: 60vh;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--accent) transparent;

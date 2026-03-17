@@ -2,10 +2,16 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1rem;
   box-shadow: var(--shadow);
   transition: border-color 0.2s ease;
   animation: widget-fade-in 0.3s ease both;
+}
+
+@media (min-width: 1200px) {
+  .widget-card {
+    padding: 1.25rem;
+  }
 }
 
 .widget-card:hover {

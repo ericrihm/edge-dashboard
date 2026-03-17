@@ -70,6 +70,10 @@ export default function App() {
   const widgets = settings?.widgets || [];
   const isVisible = (name) => widgets.includes(name);
 
+  const hasLeftCol = settings && (isVisible('weather'));
+  const hasCenterCol = settings && (isVisible('news'));
+  const hasRightCol = settings && (isVisible('notepad') || isVisible('tasks'));
+
   return (
     <>
       <style>{responsiveCSS}</style>
@@ -103,18 +107,26 @@ export default function App() {
         )}
 
         <main className="widget-grid">
-          <div className="widget-col widget-col-left">
-            {settings && isVisible('weather') && (
-              <Weather settings={settings} onOpenSettings={() => openSettings('apikeys')} />
-            )}
-            {settings && isVisible('notepad') && <Notepad />}
-            {settings && isVisible('tasks') && <TaskList />}
-          </div>
-          <div className="widget-col widget-col-right">
-            {settings && isVisible('news') && (
-              <NewsFeed settings={settings} onOpenSettings={() => openSettings('feeds')} />
-            )}
-          </div>
+          {hasLeftCol && (
+            <div className="wg-col wg-col-left">
+              {isVisible('weather') && (
+                <Weather settings={settings} onOpenSettings={() => openSettings('apikeys')} />
+              )}
+            </div>
+          )}
+          {hasCenterCol && (
+            <div className="wg-col wg-col-center">
+              {isVisible('news') && (
+                <NewsFeed settings={settings} onOpenSettings={() => openSettings('feeds')} />
+              )}
+            </div>
+          )}
+          {hasRightCol && (
+            <div className="wg-col wg-col-right">
+              {isVisible('notepad') && <Notepad />}
+              {isVisible('tasks') && <TaskList />}
+            </div>
+          )}
         </main>
 
         <footer className="dash-footer">
@@ -135,18 +147,21 @@ export default function App() {
 }
 
 const responsiveCSS = `
+  /* ── Dashboard container ──────────────────────────── */
   .dashboard {
     display: grid;
     grid-template-rows: auto auto auto 1fr auto;
     height: 100vh;
-    padding: 1.5rem 2rem;
-    gap: 1rem;
-    max-width: 1400px;
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+    max-width: 1800px;
     margin: 0 auto;
     width: 100%;
     position: relative;
     overflow: hidden;
   }
+
+  /* ── Gear button ──────────────────────────────────── */
   .gear-btn {
     position: fixed;
     top: 1rem;
@@ -167,47 +182,80 @@ const responsiveCSS = `
     color: var(--text-primary);
     background: var(--bg-secondary);
   }
+
+  /* ── Header (clock + date) ────────────────────────── */
   .dash-header {
     text-align: center;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
   }
   .clock {
     font-family: var(--font-mono);
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 300;
     letter-spacing: 0.05em;
     color: var(--text-primary);
   }
   .date {
     font-family: var(--font-sans);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
   }
+
+  /* ── Search bar row ───────────────────────────────── */
   .search-row {
-    max-width: 680px;
     width: 100%;
+    max-width: 900px;
     margin: 0 auto;
   }
+
+  /* ── Quick links row ──────────────────────────────── */
   .quick-links-row {
-    max-width: 680px;
     width: 100%;
+    max-width: 900px;
     margin: 0 auto;
   }
+
+  /* ── Widget grid — mobile-first (single column) ──── */
   .widget-grid {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     align-items: start;
     min-height: 0;
     overflow-y: auto;
   }
-  .widget-col {
+
+  .wg-col {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
     min-height: 0;
   }
+
+  /* News should fill height when in a taller column */
+  .wg-col-center {
+    min-height: 300px;
+  }
+  .wg-col-center .widget-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 300px;
+  }
+  .wg-col-center .widget-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .wg-col-center .nf-scroll-area {
+    flex: 1;
+    max-height: none;
+    min-height: 0;
+  }
+
+  /* ── Footer ───────────────────────────────────────── */
   .dash-footer {
     text-align: center;
     padding-bottom: 0.25rem;
@@ -226,26 +274,46 @@ const responsiveCSS = `
     color: var(--text-secondary);
   }
 
-  /* Responsive: medium */
-  @media (max-width: 1000px) {
-    .widget-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-  /* Responsive: narrow */
-  @media (max-width: 700px) {
+  /* ── Breakpoint: 900px+ (2 columns) ──────────────── */
+  @media (min-width: 900px) {
     .dashboard {
-      padding: 1rem;
-      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      gap: 0.85rem;
     }
     .clock {
-      font-size: 2rem;
+      font-size: 2.25rem;
     }
     .widget-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
     }
-    .search-row, .quick-links-row {
-      max-width: 100%;
+    /* Right col (notepad+tasks) goes under left col */
+    .wg-col-left  { grid-column: 1; }
+    .wg-col-center { grid-column: 2; }
+    .wg-col-right { grid-column: 1; }
+  }
+
+  /* ── Breakpoint: 1200px+ (weighted 2 columns) ───── */
+  @media (min-width: 1200px) {
+    .dashboard {
+      padding: 1.5rem 2rem;
+      gap: 1rem;
     }
+    .clock {
+      font-size: 2.5rem;
+    }
+    .widget-grid {
+      grid-template-columns: 1fr 1.5fr;
+    }
+  }
+
+  /* ── Breakpoint: 1800px+ (3 columns, ultrawide) ─── */
+  @media (min-width: 1800px) {
+    .widget-grid {
+      grid-template-columns: 1fr 1.5fr 1fr;
+    }
+    .wg-col-left   { grid-column: 1; }
+    .wg-col-center { grid-column: 2; grid-row: 1; }
+    .wg-col-right  { grid-column: 3; grid-row: 1; }
   }
 `;
