@@ -4,6 +4,8 @@ import Weather from './widgets/Weather.jsx';
 import NewsFeed from './widgets/NewsFeed.jsx';
 import SearchBar from './widgets/SearchBar.jsx';
 import QuickLinks from './widgets/QuickLinks.jsx';
+import Notepad from './widgets/Notepad.jsx';
+import TaskList from './widgets/TaskList.jsx';
 import SettingsPanel from './widgets/SettingsPanel.jsx';
 import '../src/styles/widgets.css';
 
@@ -52,12 +54,10 @@ export default function App() {
   // Keyboard shortcuts
   useEffect(() => {
     function handleKey(e) {
-      // "/" focuses search (unless typing in an input)
       if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
         e.preventDefault();
         searchRef.current?.focus();
       }
-      // Escape closes settings
       if (e.key === 'Escape' && showSettings) {
         setShowSettings(false);
       }
@@ -67,12 +67,13 @@ export default function App() {
   }, [showSettings]);
 
   const clockFormat = settings?.clockFormat || '12h';
+  const widgets = settings?.widgets || [];
+  const isVisible = (name) => widgets.includes(name);
 
   return (
     <>
       <style>{responsiveCSS}</style>
       <div className="dashboard">
-        {/* Gear icon — top right */}
         <button
           className="gear-btn"
           onClick={() => openSettings()}
@@ -89,21 +90,31 @@ export default function App() {
           <div className="date">{formatDate(now)}</div>
         </header>
 
-        {settings && (
+        {settings && isVisible('search') && (
           <div className="search-row">
             <SearchBar settings={settings} onSettingsChange={setSettings} inputRef={searchRef} />
           </div>
         )}
 
-        {settings && (
+        {settings && isVisible('quicklinks') && (
           <div className="quick-links-row">
             <QuickLinks settings={settings} onSettingsChange={setSettings} />
           </div>
         )}
 
         <main className="widget-grid">
-          {settings && <Weather settings={settings} onOpenSettings={() => openSettings('apikeys')} />}
-          {settings && <NewsFeed settings={settings} onOpenSettings={() => openSettings('feeds')} />}
+          <div className="widget-col widget-col-left">
+            {settings && isVisible('weather') && (
+              <Weather settings={settings} onOpenSettings={() => openSettings('apikeys')} />
+            )}
+            {settings && isVisible('notepad') && <Notepad />}
+            {settings && isVisible('tasks') && <TaskList />}
+          </div>
+          <div className="widget-col widget-col-right">
+            {settings && isVisible('news') && (
+              <NewsFeed settings={settings} onOpenSettings={() => openSettings('feeds')} />
+            )}
+          </div>
         </main>
 
         <footer className="dash-footer">
@@ -190,6 +201,12 @@ const responsiveCSS = `
     align-items: start;
     min-height: 0;
     overflow-y: auto;
+  }
+  .widget-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
   }
   .dash-footer {
     text-align: center;

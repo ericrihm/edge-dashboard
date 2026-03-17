@@ -122,6 +122,45 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     );
   }
 
+  /* ── Widgets ───────────────────────────────────────── */
+  const WIDGET_OPTIONS = [
+    { key: 'clock', label: 'Clock' },
+    { key: 'search', label: 'Search Bar' },
+    { key: 'quicklinks', label: 'Quick Links' },
+    { key: 'weather', label: 'Weather' },
+    { key: 'news', label: 'News Feed' },
+    { key: 'notepad', label: 'Notepad' },
+    { key: 'tasks', label: 'Task List' },
+  ];
+
+  function WidgetsSection() {
+    const currentWidgets = settings.widgets || [];
+
+    function toggleWidget(key) {
+      const updated = currentWidgets.includes(key)
+        ? currentWidgets.filter(w => w !== key)
+        : [...currentWidgets, key];
+      save({ widgets: updated });
+    }
+
+    return (
+      <Section title="Widgets" sectionKey="widgets" activeSection={initialSection}>
+        <span className="sp-helper" style={{ marginBottom: '0.5rem' }}>Show or hide dashboard widgets</span>
+        {WIDGET_OPTIONS.map(({ key, label }) => (
+          <label key={key} className="sp-checkbox-row">
+            <input
+              type="checkbox"
+              className="sp-checkbox"
+              checked={currentWidgets.includes(key)}
+              onChange={() => toggleWidget(key)}
+            />
+            <span className="sp-checkbox-label">{label}</span>
+          </label>
+        ))}
+      </Section>
+    );
+  }
+
   /* ── Location ─────────────────────────────────────── */
   function LocationSection() {
     const loc = settings.location || {};
@@ -330,6 +369,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
         </div>
         <div className="sp-panel-body">
           <GeneralSection />
+          <WidgetsSection />
           <LocationSection />
           <ApiKeysSection />
           <RssFeedsSection />
@@ -628,6 +668,26 @@ const cssText = `
     flex-direction: column;
     gap: 0.4rem;
     margin-top: 0.6rem;
+  }
+
+  /* Checkbox rows */
+  .sp-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    cursor: pointer;
+  }
+  .sp-checkbox {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .sp-checkbox-label {
+    font-size: 0.8rem;
+    color: var(--text-primary);
   }
 
   /* About */

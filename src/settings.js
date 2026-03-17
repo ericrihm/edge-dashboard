@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS = {
   searchEngine: 'google',
   accentColor: '#00b4d8',
   theme: 'dark',
-  widgets: ['weather', 'news', 'clock', 'quicklinks', 'search'],
+  widgets: ['weather', 'news', 'clock', 'quicklinks', 'search', 'notepad', 'tasks'],
   apiKeys: { openweathermap: '' },
   rssFeeds: [],
 };
