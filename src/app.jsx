@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getSettings } from './settings.js';
 import Weather from './widgets/Weather.jsx';
+import NewsFeed from './widgets/NewsFeed.jsx';
 import '../src/styles/widgets.css';
 
 function formatTime(date, format) {
@@ -48,6 +49,7 @@ export default function App() {
 
       <main style={styles.widgetGrid}>
         {settings && <Weather settings={settings} />}
+        {settings && <NewsFeed settings={settings} />}
       </main>
 
       <footer style={styles.footer}>

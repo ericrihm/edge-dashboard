@@ -38,3 +38,8 @@ body {
   background: var(--accent);
   color: var(--bg-primary);
 }
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
