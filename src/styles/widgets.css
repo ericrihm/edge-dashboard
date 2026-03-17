@@ -1,0 +1,28 @@
+.widget-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease;
+}
+
+.widget-card:hover {
+  border-color: color-mix(in srgb, var(--border) 70%, white 30%);
+}
+
+.widget-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.widget-content {
+  width: 100%;
+}
