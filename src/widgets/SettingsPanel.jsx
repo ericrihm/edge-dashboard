@@ -23,16 +23,15 @@ const DEFAULT_LINKS = [
   { name: 'GitHub', url: 'https://github.com' },
 ];
 
-/* ── Accordion Section ────────────────────────────────── */
-function Section({ title, defaultOpen, sectionKey, activeSection, children }) {
-  const [open, setOpen] = useState(defaultOpen || sectionKey === activeSection);
+/* ── Accordion Section (controlled) ──────────────────── */
+function Section({ title, isOpen, onToggle, children }) {
   return (
     <div className="sp-section">
-      <button className="sp-section-hdr" onClick={() => setOpen(!open)}>
+      <button className="sp-section-hdr" onClick={onToggle}>
         <span>{title}</span>
-        <span className="sp-chevron">{open ? '\u25B2' : '\u25BC'}</span>
+        <span className="sp-chevron">{isOpen ? '\u25B2' : '\u25BC'}</span>
       </button>
-      {open && <div className="sp-section-body">{children}</div>}
+      {isOpen && <div className="sp-section-body">{children}</div>}
     </div>
   );
 }
@@ -42,6 +41,22 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
   const panelRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+
+  // Accordion state — lifted here so it survives inner component remounts
+  const [openSections, setOpenSections] = useState(() => {
+    const initial = new Set(['general']);
+    if (initialSection) initial.add(initialSection);
+    return initial;
+  });
+
+  function toggleSection(key) {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   // RSS add form
   const [feedName, setFeedName] = useState('');
@@ -75,7 +90,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
   /* ── General ──────────────────────────────────────── */
   function GeneralSection() {
     return (
-      <Section title="General" defaultOpen sectionKey="general" activeSection={initialSection}>
+      <Section title="General" isOpen={openSections.has('general')} onToggle={() => toggleSection('general')}>
         <label className="sp-label">Clock Format</label>
         <div className="sp-toggle-row">
           {['12h', '24h'].map(v => (
@@ -144,7 +159,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     }
 
     return (
-      <Section title="Widgets" sectionKey="widgets" activeSection={initialSection}>
+      <Section title="Widgets" isOpen={openSections.has('widgets')} onToggle={() => toggleSection('widgets')}>
         <span className="sp-helper" style={{ marginBottom: '0.5rem' }}>Show or hide dashboard widgets</span>
         {WIDGET_OPTIONS.map(({ key, label }) => (
           <label key={key} className="sp-checkbox-row">
@@ -187,7 +202,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     }
 
     return (
-      <Section title="Location" sectionKey="location" activeSection={initialSection}>
+      <Section title="Location" isOpen={openSections.has('location')} onToggle={() => toggleSection('location')}>
         <label className="sp-label">City</label>
         <input className="sp-input" value={city} onChange={e => setCity(e.target.value)} onBlur={saveLocation} />
 
@@ -212,7 +227,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     }
 
     return (
-      <Section title="API Keys" sectionKey="apikeys" activeSection={initialSection}>
+      <Section title="API Keys" isOpen={openSections.has('apikeys')} onToggle={() => toggleSection('apikeys')}>
         <label className="sp-label">OpenWeatherMap API Key</label>
         <div className="sp-input-group">
           <input
@@ -262,7 +277,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     }
 
     return (
-      <Section title="RSS Feeds" sectionKey="feeds" activeSection={initialSection}>
+      <Section title="RSS Feeds" isOpen={openSections.has('feeds')} onToggle={() => toggleSection('feeds')}>
         <div className="sp-list">
           {feeds.map((f, i) => (
             <div key={`${f.url}-${i}`} className="sp-list-item">
@@ -314,7 +329,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
     }
 
     return (
-      <Section title="Quick Links" sectionKey="quicklinks" activeSection={initialSection}>
+      <Section title="Quick Links" isOpen={openSections.has('quicklinks')} onToggle={() => toggleSection('quicklinks')}>
         <div className="sp-list">
           {links.map((l, i) => (
             <div key={`${l.url}-${i}`} className="sp-list-item">
@@ -341,7 +356,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
   /* ── About ────────────────────────────────────────── */
   function AboutSection() {
     return (
-      <Section title="About" sectionKey="about" activeSection={initialSection}>
+      <Section title="About" isOpen={openSections.has('about')} onToggle={() => toggleSection('about')}>
         <div className="sp-about">
           <strong>Dashboard</strong> v1.0.0
           <br />
