@@ -1,11 +1,16 @@
 .widget-card {
   background: var(--bg-card);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem;
-  box-shadow: var(--shadow);
-  transition: border-color 0.2s ease;
-  animation: widget-fade-in 0.3s ease both;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  animation: widgetEnter 0.4s ease forwards;
+  opacity: 0;
 }
 
 @media (min-width: 1200px) {
@@ -15,7 +20,11 @@
 }
 
 .widget-card:hover {
-  border-color: color-mix(in srgb, var(--border) 70%, white 30%);
+  border-color: var(--border-hover);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .widget-header {
@@ -24,10 +33,11 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
-  font-size: 0.75rem;
-  font-variant: small-caps;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
 }
 
 .widget-content {
@@ -35,8 +45,8 @@
 }
 
 /* Staggered animation delays for widgets in grid */
-.widget-card:nth-child(1) { animation-delay: 0ms; }
-.widget-card:nth-child(2) { animation-delay: 50ms; }
-.widget-card:nth-child(3) { animation-delay: 100ms; }
-.widget-card:nth-child(4) { animation-delay: 150ms; }
-.widget-card:nth-child(5) { animation-delay: 200ms; }
+.widget-card:nth-child(1) { animation-delay: 0.05s; }
+.widget-card:nth-child(2) { animation-delay: 0.1s; }
+.widget-card:nth-child(3) { animation-delay: 0.15s; }
+.widget-card:nth-child(4) { animation-delay: 0.2s; }
+.widget-card:nth-child(5) { animation-delay: 0.25s; }

@@ -29,10 +29,10 @@ function FaviconImg({ url, name }) {
   if (failed || !domain) {
     return (
       <div style={{
-        width: 32, height: 32, borderRadius: '50%',
+        width: 28, height: 28, borderRadius: '50%',
         background: `hsl(${hue}, 55%, 45%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '0.9rem', fontWeight: 600, color: '#fff',
+        fontSize: '0.8rem', fontWeight: 600, color: '#fff',
       }}>
         {letter}
       </div>
@@ -43,9 +43,9 @@ function FaviconImg({ url, name }) {
     <img
       src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
       alt=""
-      width={32}
-      height={32}
-      style={{ borderRadius: 4 }}
+      width={28}
+      height={28}
+      style={{ borderRadius: 8, background: 'rgba(0,0,0,0.3)', padding: 2 }}
       onError={() => setFailed(true)}
     />
   );
@@ -135,10 +135,16 @@ const cssText = `
   .ql-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
-  @media (max-width: 600px) {
-    .ql-grid { grid-template-columns: repeat(3, 1fr); }
+  @media (min-width: 600px) {
+    .ql-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (min-width: 900px) {
+    .ql-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (min-width: 1400px) {
+    .ql-grid { grid-template-columns: repeat(8, 1fr); }
   }
   .ql-tile-wrap {
     position: relative;
@@ -148,28 +154,31 @@ const cssText = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    background: var(--bg-secondary);
-    border-radius: 10px;
-    padding: 0.6rem 0.4rem;
-    min-height: 64px;
+    gap: 0.3rem;
+    background: var(--bg-card);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.5rem 0.4rem;
+    min-height: 60px;
     text-decoration: none;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     cursor: pointer;
   }
   @media (min-width: 1200px) {
     .ql-tile {
-      padding: 0.75rem 0.5rem;
-      min-height: 80px;
-      gap: 0.4rem;
+      padding: 0.6rem 0.5rem;
+      min-height: 68px;
     }
   }
   .ql-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    transform: scale(1.03);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--accent-glow);
   }
   .ql-name {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-secondary);
     text-align: center;
     overflow: hidden;
@@ -181,14 +190,14 @@ const cssText = `
     position: absolute;
     top: -4px;
     right: -4px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--error);
     color: #fff;
     border: none;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -209,17 +218,18 @@ const cssText = `
     color: var(--accent);
   }
   .ql-add-tile {
-    border: 1px dashed var(--border);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
     background: transparent;
+    backdrop-filter: none;
   }
   .ql-add-input {
     width: 100%;
-    background: var(--bg-card);
+    background: var(--bg-input);
     border: 1px solid var(--border);
     border-radius: 4px;
     color: var(--text-primary);
-    font-size: 0.65rem;
-    padding: 0.25rem 0.4rem;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.35rem;
     outline: none;
   }
   .ql-add-input:focus {
@@ -231,9 +241,9 @@ const cssText = `
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    padding: 0.2rem 0.6rem;
+    padding: 0.15rem 0.5rem;
     width: 100%;
   }
 `;
@@ -245,7 +255,7 @@ const s = {
   addForm: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.3rem',
+    gap: '0.25rem',
     width: '100%',
   },
 };

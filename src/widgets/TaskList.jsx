@@ -106,9 +106,9 @@ const cssText = `
   }
   .tl-input {
     flex: 1;
-    background: var(--bg-primary);
+    background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 0.8rem;

@@ -62,9 +62,9 @@ export default function Notepad() {
 const cssText = `
   .np-textarea {
     width: 100%;
-    background: var(--bg-primary);
+    background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-family: var(--font-mono);
     font-size: 0.8rem;

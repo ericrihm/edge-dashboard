@@ -294,9 +294,10 @@ const s = {
   },
   tempLarge: {
     fontFamily: 'var(--font-mono)',
-    fontSize: '3rem',
+    fontSize: '3.5rem',
     fontWeight: 300,
     lineHeight: 1.1,
+    letterSpacing: '-1px',
   },
   condition: {
     fontSize: '0.95rem',
@@ -310,11 +311,11 @@ const s = {
     flexShrink: 0,
   },
   details: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.75rem',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '0.4rem 0.75rem',
     marginTop: '0.75rem',
-    fontSize: '0.8rem',
+    fontSize: '0.78rem',
     color: 'var(--text-secondary)',
   },
   errorBadge: {
@@ -334,12 +335,13 @@ const s = {
     flex: '1 0 60px',
     minWidth: '60px',
     textAlign: 'center',
-    padding: '0.5rem',
-    borderRadius: '8px',
-    background: 'var(--bg-secondary)',
+    padding: '0.5rem 0.25rem',
+    borderRight: '1px solid var(--border)',
   },
   forecastCardToday: {
-    border: '1px solid var(--accent)',
+    background: 'rgba(0, 180, 216, 0.08)',
+    borderRadius: '8px',
+    borderRight: 'none',
   },
   forecastDay: {
     fontSize: '0.75rem',

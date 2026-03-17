@@ -32,11 +32,15 @@ function timeAgo(dateString) {
   return `${months}mo ago`;
 }
 
-const CATEGORY_COLORS = {
-  Cybersecurity: '#ff4081',
-  'CMMC/GRC': '#ffd600',
-  Tech: '#00e5ff',
+const CATEGORY_STYLES = {
+  Cybersecurity: { bg: 'rgba(255, 23, 68, 0.15)', color: '#ff4081', border: 'rgba(255, 23, 68, 0.3)' },
+  'CMMC/GRC': { bg: 'rgba(255, 214, 0, 0.15)', color: '#ffd600', border: 'rgba(255, 214, 0, 0.3)' },
+  Tech: { bg: 'rgba(0, 180, 216, 0.15)', color: '#00e5ff', border: 'rgba(0, 180, 216, 0.3)' },
 };
+
+function getSourceStyle(category) {
+  return CATEGORY_STYLES[category] || { bg: 'rgba(136, 136, 160, 0.15)', color: 'var(--text-muted)', border: 'rgba(136, 136, 160, 0.3)' };
+}
 
 export default function NewsFeed({ settings, onOpenSettings }) {
   const feedList = settings.rssFeeds?.length > 0 ? settings.rssFeeds : DEFAULT_FEEDS;
@@ -137,30 +141,36 @@ export default function NewsFeed({ settings, onOpenSettings }) {
                 : 'No articles in this category.'}
             </div>
           ) : (
-            filtered.map((article, i) => (
-              <div key={`${article.link}-${i}`} className="nf-article">
-                <div className="nf-article-meta">
-                  <span
-                    className="nf-source"
-                    style={{ color: CATEGORY_COLORS[article.category] || 'var(--text-muted)' }}
+            filtered.map((article, i) => {
+              const catStyle = getSourceStyle(article.category);
+              return (
+                <div key={`${article.link}-${i}`} className="nf-article">
+                  <div className="nf-article-meta">
+                    <span
+                      className="nf-source"
+                      style={{
+                        color: catStyle.color,
+                        background: catStyle.bg,
+                      }}
+                    >
+                      {article.source}
+                    </span>
+                    <span className="nf-time">{timeAgo(article.pubDate)}</span>
+                  </div>
+                  <a
+                    href={article.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nf-title"
                   >
-                    {article.source}
-                  </span>
-                  <span className="nf-time">{timeAgo(article.pubDate)}</span>
+                    {article.title}
+                  </a>
+                  {article.snippet && (
+                    <div className="nf-snippet">{article.snippet}</div>
+                  )}
                 </div>
-                <a
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nf-title"
-                >
-                  {article.title}
-                </a>
-                {article.snippet && (
-                  <div className="nf-snippet">{article.snippet}</div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -173,11 +183,12 @@ const cssText = `
     background: none;
     border: 1px solid var(--border);
     border-radius: 999px;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.7rem;
-    padding: 0.3rem 0.75rem;
-    transition: all 0.15s ease;
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 0.25rem 0.65rem;
+    transition: all 0.2s ease;
     white-space: nowrap;
   }
   .nf-tab:hover {
@@ -188,11 +199,16 @@ const cssText = `
     background: var(--accent);
     border-color: var(--accent);
     color: var(--bg-primary);
+    font-weight: 600;
+    box-shadow: 0 0 12px var(--accent-glow);
   }
   .nf-scroll-area {
     max-height: 60vh;
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .nf-scroll-area:hover {
     scrollbar-color: var(--accent) transparent;
   }
   .nf-scroll-area::-webkit-scrollbar {
@@ -202,15 +218,25 @@ const cssText = `
     background: transparent;
   }
   .nf-scroll-area::-webkit-scrollbar-thumb {
-    background: var(--accent);
+    background: transparent;
     border-radius: 4px;
+    transition: background 0.2s;
+  }
+  .nf-scroll-area:hover::-webkit-scrollbar-thumb {
+    background: var(--accent);
   }
   .nf-article {
-    padding: 0.75rem 0;
+    padding: 0.65rem 0 0.65rem 0.65rem;
     border-bottom: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    margin-left: 0;
+    transition: border-left-color 0.15s;
   }
   .nf-article:last-child {
     border-bottom: none;
+  }
+  .nf-article:hover {
+    border-left-color: var(--accent-hover);
   }
   .nf-article-meta {
     display: flex;
@@ -219,13 +245,16 @@ const cssText = `
     margin-bottom: 0.25rem;
   }
   .nf-source {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    line-height: 1;
   }
   .nf-time {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--text-muted);
   }
   .nf-title {
@@ -233,7 +262,7 @@ const cssText = `
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.35;
     transition: color 0.15s ease;
   }
@@ -242,7 +271,7 @@ const cssText = `
   }
   .nf-snippet {
     color: var(--text-secondary);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     line-height: 1.4;
     margin-top: 0.2rem;
     display: -webkit-box;
@@ -260,7 +289,7 @@ const cssText = `
   .nf-skeleton-line {
     height: 0.75rem;
     border-radius: 4px;
-    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%);
+    background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card-solid) 50%, var(--bg-secondary) 75%);
     background-size: 200% 100%;
     animation: nf-shimmer 1.5s infinite;
   }
@@ -278,7 +307,7 @@ const s = {
   },
   tabs: {
     display: 'flex',
-    gap: '0.4rem',
+    gap: '0.35rem',
     flexWrap: 'wrap',
     marginBottom: '0.75rem',
   },
@@ -289,15 +318,18 @@ const s = {
     fontSize: '0.9rem',
   },
   warnBadge: {
-    fontSize: '0.65rem',
+    fontSize: '0.6rem',
     color: 'var(--warning)',
     cursor: 'help',
+    letterSpacing: 'normal',
+    textTransform: 'none',
+    fontWeight: 400,
   },
   onboardingBtn: {
     background: 'var(--accent)',
     color: 'var(--bg-primary)',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '8px',
     fontSize: '0.8rem',
     fontWeight: 600,
     padding: '0.5rem 1.25rem',

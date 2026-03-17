@@ -33,12 +33,32 @@ const WIDGET_OPTIONS = [
   { key: 'tasks', label: 'Task List' },
 ];
 
+/* ── Toggle Switch ─────────────────────────────────────── */
+function Toggle({ value, options, onChange }) {
+  return (
+    <div className="sp-switch-row">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          className={`sp-switch-opt${value === opt.value ? ' sp-switch-active' : ''}`}
+          onClick={() => onChange(opt.value)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /* ── Accordion Section (controlled) ──────────────────── */
 function Section({ title, isOpen, onToggle, children }) {
   return (
     <div className="sp-section">
       <button className="sp-section-hdr" onClick={onToggle}>
-        <span>{title}</span>
+        <span className="sp-section-title">
+          <span className="sp-dot" />
+          {title}
+        </span>
         <span className="sp-chevron">{isOpen ? '\u25B2' : '\u25BC'}</span>
       </button>
       {isOpen && <div className="sp-section-body">{children}</div>}
@@ -92,8 +112,16 @@ function LocationSection({ settings, save, isOpen, onToggle }) {
 function ApiKeysSection({ settings, save, isOpen, onToggle, showApiKey, setShowApiKey }) {
   const [key, setKey] = useState(settings.apiKeys?.openweathermap || '');
 
-  function saveKey() {
-    save({ apiKeys: { ...settings.apiKeys, openweathermap: key } });
+  function saveKey(value) {
+    const k = value !== undefined ? value : key;
+    save({ apiKeys: { ...settings.apiKeys, openweathermap: k } });
+  }
+
+  function handlePaste(e) {
+    const pasted = e.clipboardData.getData('text');
+    setKey(pasted);
+    // Save immediately after paste — don't wait for blur
+    setTimeout(() => saveKey(pasted), 0);
   }
 
   return (
@@ -105,7 +133,8 @@ function ApiKeysSection({ settings, save, isOpen, onToggle, showApiKey, setShowA
           type={showApiKey ? 'text' : 'password'}
           value={key}
           onChange={e => setKey(e.target.value)}
-          onBlur={saveKey}
+          onPaste={handlePaste}
+          onBlur={() => saveKey()}
           placeholder="Paste your API key"
         />
         <button className="sp-btn-icon" onClick={() => setShowApiKey(!showApiKey)} title={showApiKey ? 'Hide' : 'Show'}>
@@ -223,33 +252,38 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
       <div ref={panelRef} className={`sp-panel${visible ? ' sp-panel-open' : ''}`}>
         <div className="sp-panel-header">
           <span className="sp-panel-title">Settings</span>
-          <button className="sp-close" onClick={close} title="Close">&times;</button>
+          <button className="sp-close" onClick={close} title="Close (Esc)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
         <div className="sp-panel-body">
 
           {/* ── General ─────────────────────────────── */}
           <Section title="General" isOpen={openSections.has('general')} onToggle={() => toggleSection('general')}>
+            <label className="sp-label">Your Name</label>
+            <input
+              className="sp-input"
+              value={settings.userName || ''}
+              onChange={e => save({ userName: e.target.value })}
+              placeholder="Enter your name"
+            />
+
             <label className="sp-label">Clock Format</label>
-            <div className="sp-toggle-row">
-              {['12h', '24h'].map(v => (
-                <button
-                  key={v}
-                  className={`sp-toggle-btn${settings.clockFormat === v ? ' sp-active' : ''}`}
-                  onClick={() => save({ clockFormat: v })}
-                >{v}</button>
-              ))}
-            </div>
+            <Toggle
+              value={settings.clockFormat}
+              options={[{ value: '12h', label: '12h' }, { value: '24h', label: '24h' }]}
+              onChange={v => save({ clockFormat: v })}
+            />
 
             <label className="sp-label">Temperature Unit</label>
-            <div className="sp-toggle-row">
-              {['F', 'C'].map(v => (
-                <button
-                  key={v}
-                  className={`sp-toggle-btn${settings.temperatureUnit === v ? ' sp-active' : ''}`}
-                  onClick={() => save({ temperatureUnit: v })}
-                >{v === 'F' ? '\u00B0F' : '\u00B0C'}</button>
-              ))}
-            </div>
+            <Toggle
+              value={settings.temperatureUnit}
+              options={[{ value: 'F', label: '\u00B0F' }, { value: 'C', label: '\u00B0C' }]}
+              onChange={v => save({ temperatureUnit: v })}
+            />
 
             <label className="sp-label">Search Engine</label>
             <select
@@ -289,7 +323,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
             ))}
           </Section>
 
-          {/* ── Location (top-level component — has local state) ── */}
+          {/* ── Location ────────────────────────────── */}
           <LocationSection
             settings={settings}
             save={save}
@@ -297,7 +331,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose, ini
             onToggle={() => toggleSection('location')}
           />
 
-          {/* ── API Keys (top-level component — has local state) ── */}
+          {/* ── API Keys ────────────────────────────── */}
           <ApiKeysSection
             settings={settings}
             save={save}
@@ -383,9 +417,11 @@ const cssText = `
     background: rgba(0,0,0,0);
     z-index: 1000;
     transition: background 0.25s;
+    backdrop-filter: blur(0px);
   }
   .sp-overlay.sp-visible {
-    background: rgba(0,0,0,0.55);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
   }
   .sp-panel {
     position: fixed;
@@ -395,7 +431,9 @@ const cssText = `
     max-width: 90vw;
     height: 100vh;
     max-height: 100vh;
-    background: var(--bg-secondary);
+    background: rgba(15, 17, 23, 0.85);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
     border-left: 1px solid var(--border);
     transform: translateX(100%);
     transition: transform 0.25s ease;
@@ -423,15 +461,18 @@ const cssText = `
   .sp-close {
     background: none;
     border: none;
-    color: var(--text-secondary);
-    font-size: 1.5rem;
+    color: var(--text-muted);
     cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.15s;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
   }
   .sp-close:hover {
     color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
   }
   .sp-panel-body {
     flex: 1;
@@ -439,11 +480,11 @@ const cssText = `
     overflow-y: auto;
     padding: 0.5rem 0;
     scrollbar-width: thin;
-    scrollbar-color: var(--accent) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
   }
   .sp-panel-body::-webkit-scrollbar { width: 4px; }
   .sp-panel-body::-webkit-scrollbar-track { background: transparent; }
-  .sp-panel-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+  .sp-panel-body::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 4px; }
 
   /* Sections / Accordion */
   .sp-section {
@@ -465,7 +506,19 @@ const cssText = `
     transition: background 0.1s;
   }
   .sp-section-hdr:hover {
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.02);
+  }
+  .sp-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .sp-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
   }
   .sp-chevron {
     font-size: 0.55rem;
@@ -473,6 +526,36 @@ const cssText = `
   }
   .sp-section-body {
     padding: 0 1.25rem 1rem;
+  }
+
+  /* Toggle switches */
+  .sp-switch-row {
+    display: flex;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .sp-switch-opt {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .sp-switch-opt:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+  .sp-switch-active {
+    background: var(--accent);
+    color: var(--bg-primary);
+    font-weight: 600;
+    box-shadow: 0 0 12px var(--accent-glow);
   }
 
   /* Form controls */
@@ -487,19 +570,21 @@ const cssText = `
   .sp-input {
     display: block;
     width: 100%;
-    background: var(--bg-primary);
+    background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 0.85rem;
     padding: 0.5rem 0.65rem;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
     box-sizing: border-box;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
   }
   .sp-input:focus {
     border-color: var(--accent);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 2px var(--accent-glow);
   }
   .sp-input:disabled {
     opacity: 0.4;
@@ -508,15 +593,16 @@ const cssText = `
   .sp-select {
     display: block;
     width: 100%;
-    background: var(--bg-primary);
+    background: var(--bg-input);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-size: 0.85rem;
     padding: 0.5rem 0.65rem;
     outline: none;
     cursor: pointer;
     box-sizing: border-box;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
   }
   .sp-select:focus {
     border-color: var(--accent);
@@ -532,51 +618,24 @@ const cssText = `
   .sp-btn-icon {
     background: none;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-secondary);
     font-size: 0.7rem;
     cursor: pointer;
     padding: 0.5rem 0.5rem;
     white-space: nowrap;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, color 0.15s;
   }
   .sp-btn-icon:hover {
     border-color: var(--accent);
     color: var(--text-primary);
   }
 
-  /* Toggle row */
-  .sp-toggle-row {
-    display: flex;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .sp-toggle-btn {
-    flex: 1;
-    background: var(--bg-primary);
-    border: none;
-    border-right: 1px solid var(--border);
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    padding: 0.45rem 0;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .sp-toggle-btn:last-child { border-right: none; }
-  .sp-toggle-btn:hover { color: var(--text-primary); }
-  .sp-toggle-btn.sp-active {
-    background: var(--accent);
-    color: var(--bg-primary);
-    font-weight: 600;
-  }
-
   /* Buttons */
   .sp-btn {
     display: inline-block;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.8rem;
     padding: 0.5rem 1rem;
     cursor: pointer;
@@ -590,7 +649,7 @@ const cssText = `
     font-weight: 600;
   }
   .sp-btn-secondary {
-    background: var(--bg-primary);
+    background: var(--bg-input);
     color: var(--text-secondary);
     border: 1px solid var(--border);
   }
@@ -621,7 +680,7 @@ const cssText = `
     gap: 0;
     margin: 0.5rem 0;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     overflow: hidden;
     max-height: 240px;
     overflow-y: auto;
