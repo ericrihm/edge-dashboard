@@ -8,9 +8,14 @@ export const DEFAULT_SETTINGS = {
   accentColor: '#00b4d8',
   theme: 'dark',
   userName: 'Eric',
-  widgets: ['weather', 'news', 'clock', 'quicklinks', 'search', 'notepad', 'tasks'],
+  widgets: ['weather', 'news', 'clock', 'quicklinks', 'search', 'notepad', 'tasks', 'briefing', 'todaybar'],
   apiKeys: { openweathermap: '' },
   rssFeeds: [],
+  newsDisplayMode: 'standard',
+  feedCategoryStyle: 'auto',
+  enabledCategories: [],
+  briefingEnabled: true,
+  todayBarEnabled: true,
 };
 
 export async function getSettings() {
