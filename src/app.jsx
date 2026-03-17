@@ -149,8 +149,8 @@ export default function App() {
 const responsiveCSS = `
   /* ── Dashboard container ──────────────────────────── */
   .dashboard {
-    display: grid;
-    grid-template-rows: auto auto auto 1fr auto;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
     padding: 1rem 1.5rem;
     gap: 0.75rem;
@@ -187,6 +187,7 @@ const responsiveCSS = `
   .dash-header {
     text-align: center;
     padding-top: 0.25rem;
+    flex-shrink: 0;
   }
   .clock {
     font-family: var(--font-mono);
@@ -207,6 +208,7 @@ const responsiveCSS = `
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
+    flex-shrink: 0;
   }
 
   /* ── Quick links row ──────────────────────────────── */
@@ -214,6 +216,7 @@ const responsiveCSS = `
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
+    flex-shrink: 0;
   }
 
   /* ── Widget grid — mobile-first (single column) ──── */
@@ -222,8 +225,11 @@ const responsiveCSS = `
     grid-template-columns: 1fr;
     gap: 0.75rem;
     align-items: start;
+    flex: 1;
     min-height: 0;
     overflow-y: auto;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
   }
 
   .wg-col {
@@ -259,6 +265,7 @@ const responsiveCSS = `
   .dash-footer {
     text-align: center;
     padding-bottom: 0.25rem;
+    flex-shrink: 0;
   }
   .footer-settings-btn {
     background: none;
