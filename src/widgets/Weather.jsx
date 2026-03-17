@@ -52,7 +52,7 @@ function todayHighLow(forecastDays) {
   return todayData ? { high: todayData.high, low: todayData.low } : null;
 }
 
-export default function Weather({ settings }) {
+export default function Weather({ settings, onOpenSettings }) {
   const { location, apiKeys, temperatureUnit } = settings;
   const apiKey = apiKeys?.openweathermap;
   const unit = temperatureUnit || 'F';
@@ -77,7 +77,7 @@ export default function Weather({ settings }) {
       ]);
 
       if (!currentRes.ok || !forecastRes.ok) {
-        throw new Error('API request failed');
+        throw new Error('Weather data unavailable');
       }
 
       const currentData = await currentRes.json();
@@ -91,6 +91,7 @@ export default function Weather({ settings }) {
       await setLocal(CACHE_KEY_CURRENT, { data: currentData, ts: Date.now() });
       await setLocal(CACHE_KEY_FORECAST, { data: forecastData, ts: Date.now() });
     } catch (err) {
+      // Show cached data + error badge
       setError(err.message);
     } finally {
       setLoading(false);
@@ -124,8 +125,16 @@ export default function Weather({ settings }) {
     return (
       <div className="widget-card">
         <div className="widget-header"><span>Weather</span></div>
-        <div className="widget-content" style={s.noKey}>
-          <p>Add OpenWeatherMap API key in Settings</p>
+        <div className="widget-content" style={s.onboarding}>
+          <div style={s.onboardingIcon}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z" />
+            </svg>
+          </div>
+          <p style={s.onboardingText}>Add an OpenWeatherMap API key to see weather data</p>
+          <button style={s.onboardingBtn} onClick={onOpenSettings}>
+            Open Settings
+          </button>
           <a
             href="https://home.openweathermap.org/api_keys"
             target="_blank"
@@ -144,9 +153,9 @@ export default function Weather({ settings }) {
       <div className="widget-card">
         <div className="widget-header"><span>Weather</span></div>
         <div className="widget-content">
-          <div style={s.skeleton} />
-          <div style={{ ...s.skeleton, width: '60%', height: '1rem' }} />
-          <div style={{ ...s.skeleton, width: '40%', height: '1rem', marginTop: '0.5rem' }} />
+          <div className="skeleton" style={{ height: '3rem', width: '100%', marginBottom: '0.75rem' }} />
+          <div className="skeleton" style={{ height: '1rem', width: '60%', marginBottom: '0.5rem' }} />
+          <div className="skeleton" style={{ height: '1rem', width: '40%' }} />
         </div>
       </div>
     );
@@ -160,7 +169,7 @@ export default function Weather({ settings }) {
     <div className="widget-card" style={s.card}>
       <div className="widget-header">
         <span>Weather</span>
-        {error && <span style={s.errorBadge}>Update failed</span>}
+        {error && <span style={s.errorBadge} title={error}>Offline</span>}
       </div>
       <div className="widget-content">
         {/* Current conditions */}
@@ -169,7 +178,7 @@ export default function Weather({ settings }) {
             <div style={s.currentMain}>
               <div>
                 <div style={s.cityLabel}>{location.city} &middot; Now</div>
-                <div style={s.tempLarge}>{convertTemp(current.main.temp, unit)}°{unit}</div>
+                <div style={s.tempLarge}>{convertTemp(current.main.temp, unit)}&deg;{unit}</div>
                 <div style={s.condition}>{current.weather[0].description}</div>
               </div>
               <img
@@ -179,10 +188,10 @@ export default function Weather({ settings }) {
               />
             </div>
             <div style={s.details}>
-              <span>Feels like {convertTemp(current.main.feels_like, unit)}°</span>
+              <span>Feels like {convertTemp(current.main.feels_like, unit)}&deg;</span>
               <span>Humidity {current.main.humidity}%</span>
               <span>Wind {Math.round(current.wind.speed)} mph</span>
-              {hl && <span>H: {convertTemp(hl.high, unit)}° L: {convertTemp(hl.low, unit)}°</span>}
+              {hl && <span>H: {convertTemp(hl.high, unit)}&deg; L: {convertTemp(hl.low, unit)}&deg;</span>}
             </div>
           </div>
         )}
@@ -201,8 +210,8 @@ export default function Weather({ settings }) {
                 <div style={s.forecastDay}>{getDayName(day.date)}</div>
                 <img src={iconUrl(day.icon)} alt={day.description} style={s.iconSmall} />
                 <div style={s.forecastTemps}>
-                  <span>{convertTemp(day.high, unit)}°</span>
-                  <span style={s.lowTemp}>{convertTemp(day.low, unit)}°</span>
+                  <span style={s.monoTemp}>{convertTemp(day.high, unit)}&deg;</span>
+                  <span style={{ ...s.monoTemp, ...s.lowTemp }}>{convertTemp(day.low, unit)}&deg;</span>
                 </div>
               </div>
             ))}
@@ -221,7 +230,7 @@ export default function Weather({ settings }) {
                   <div key={item.dt} style={s.hourlyCard}>
                     <div style={s.hourlyTime}>{formatHour(item.dt)}</div>
                     <img src={iconUrl(item.weather[0].icon)} alt="" style={s.iconSmall} />
-                    <div>{convertTemp(item.main.temp, unit)}°</div>
+                    <div style={s.monoTemp}>{convertTemp(item.main.temp, unit)}&deg;</div>
                   </div>
                 ))}
               </div>
@@ -237,25 +246,38 @@ const s = {
   card: {
     minWidth: 0,
   },
-  noKey: {
+  onboarding: {
     textAlign: 'center',
-    padding: '2rem 1rem',
+    padding: '1.5rem 1rem',
+  },
+  onboardingIcon: {
+    marginBottom: '0.75rem',
+  },
+  onboardingText: {
     color: 'var(--text-secondary)',
+    fontSize: '0.85rem',
+    marginBottom: '0.75rem',
+  },
+  onboardingBtn: {
+    background: 'var(--accent)',
+    color: 'var(--bg-primary)',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    fontFamily: 'var(--font-sans)',
+    padding: '0.5rem 1.25rem',
+    cursor: 'pointer',
+    transition: 'opacity 0.15s',
+    display: 'inline-block',
+    marginBottom: '0.5rem',
   },
   link: {
     color: 'var(--accent)',
     textDecoration: 'none',
-    display: 'inline-block',
-    marginTop: '0.5rem',
-  },
-  skeleton: {
-    background: 'linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%)',
-    backgroundSize: '200% 100%',
-    animation: 'shimmer 1.5s infinite',
-    borderRadius: '8px',
-    height: '3rem',
-    width: '100%',
-    marginBottom: '0.75rem',
+    display: 'block',
+    fontSize: '0.75rem',
+    marginTop: '0.25rem',
   },
   currentSection: {
     marginBottom: '1.25rem',
@@ -271,6 +293,7 @@ const s = {
     marginBottom: '0.25rem',
   },
   tempLarge: {
+    fontFamily: 'var(--font-mono)',
     fontSize: '3rem',
     fontWeight: 300,
     lineHeight: 1.1,
@@ -295,8 +318,11 @@ const s = {
     color: 'var(--text-secondary)',
   },
   errorBadge: {
-    fontSize: '0.7rem',
-    color: 'var(--error)',
+    fontSize: '0.65rem',
+    color: 'var(--warning)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.3rem',
   },
   forecastRow: {
     display: 'flex',
@@ -330,6 +356,10 @@ const s = {
     gap: '0.4rem',
     fontSize: '0.8rem',
   },
+  monoTemp: {
+    fontFamily: 'var(--font-mono)',
+    fontWeight: 400,
+  },
   lowTemp: {
     color: 'var(--text-muted)',
   },
@@ -338,11 +368,13 @@ const s = {
     border: 'none',
     color: 'var(--text-secondary)',
     cursor: 'pointer',
+    fontFamily: 'var(--font-sans)',
     fontSize: '0.8rem',
     padding: '0.5rem 0',
     marginTop: '0.75rem',
     width: '100%',
     textAlign: 'center',
+    transition: 'color 0.15s',
   },
   hourlyRow: {
     display: 'flex',
@@ -361,7 +393,8 @@ const s = {
     minWidth: '60px',
   },
   hourlyTime: {
-    fontSize: '0.7rem',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '0.65rem',
     color: 'var(--text-secondary)',
     marginBottom: '0.25rem',
   },

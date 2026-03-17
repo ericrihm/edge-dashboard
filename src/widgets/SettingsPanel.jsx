@@ -24,8 +24,8 @@ const DEFAULT_LINKS = [
 ];
 
 /* ── Accordion Section ────────────────────────────────── */
-function Section({ title, defaultOpen, children }) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
+function Section({ title, defaultOpen, sectionKey, activeSection, children }) {
+  const [open, setOpen] = useState(defaultOpen || sectionKey === activeSection);
   return (
     <div className="sp-section">
       <button className="sp-section-hdr" onClick={() => setOpen(!open)}>
@@ -38,7 +38,7 @@ function Section({ title, defaultOpen, children }) {
 }
 
 /* ── Main Panel ───────────────────────────────────────── */
-export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
+export default function SettingsPanel({ settings, onSettingsChange, onClose, initialSection }) {
   const panelRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
@@ -75,7 +75,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
   /* ── General ──────────────────────────────────────── */
   function GeneralSection() {
     return (
-      <Section title="General" defaultOpen>
+      <Section title="General" defaultOpen sectionKey="general" activeSection={initialSection}>
         <label className="sp-label">Clock Format</label>
         <div className="sp-toggle-row">
           {['12h', '24h'].map(v => (
@@ -148,7 +148,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
     }
 
     return (
-      <Section title="Location">
+      <Section title="Location" sectionKey="location" activeSection={initialSection}>
         <label className="sp-label">City</label>
         <input className="sp-input" value={city} onChange={e => setCity(e.target.value)} onBlur={saveLocation} />
 
@@ -173,7 +173,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
     }
 
     return (
-      <Section title="API Keys">
+      <Section title="API Keys" sectionKey="apikeys" activeSection={initialSection}>
         <label className="sp-label">OpenWeatherMap API Key</label>
         <div className="sp-input-group">
           <input
@@ -223,7 +223,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
     }
 
     return (
-      <Section title="RSS Feeds">
+      <Section title="RSS Feeds" sectionKey="feeds" activeSection={initialSection}>
         <div className="sp-list">
           {feeds.map((f, i) => (
             <div key={`${f.url}-${i}`} className="sp-list-item">
@@ -275,7 +275,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
     }
 
     return (
-      <Section title="Quick Links">
+      <Section title="Quick Links" sectionKey="quicklinks" activeSection={initialSection}>
         <div className="sp-list">
           {links.map((l, i) => (
             <div key={`${l.url}-${i}`} className="sp-list-item">
@@ -302,7 +302,7 @@ export default function SettingsPanel({ settings, onSettingsChange, onClose }) {
   /* ── About ────────────────────────────────────────── */
   function AboutSection() {
     return (
-      <Section title="About">
+      <Section title="About" sectionKey="about" activeSection={initialSection}>
         <div className="sp-about">
           <strong>Dashboard</strong> v1.0.0
           <br />
@@ -379,6 +379,7 @@ const cssText = `
     border-bottom: 1px solid var(--border);
   }
   .sp-panel-title {
+    font-family: var(--font-sans);
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -419,6 +420,7 @@ const cssText = `
     background: none;
     border: none;
     color: var(--text-primary);
+    font-family: var(--font-sans);
     font-weight: 600;
     font-size: 0.85rem;
     padding: 0.85rem 1.25rem;
@@ -452,6 +454,7 @@ const cssText = `
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text-primary);
+    font-family: var(--font-sans);
     font-size: 0.85rem;
     padding: 0.5rem 0.65rem;
     outline: none;

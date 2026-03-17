@@ -5,6 +5,7 @@
   padding: 1.25rem;
   box-shadow: var(--shadow);
   transition: border-color 0.2s ease;
+  animation: widget-fade-in 0.3s ease both;
 }
 
 .widget-card:hover {
@@ -26,3 +27,10 @@
 .widget-content {
   width: 100%;
 }
+
+/* Staggered animation delays for widgets in grid */
+.widget-card:nth-child(1) { animation-delay: 0ms; }
+.widget-card:nth-child(2) { animation-delay: 50ms; }
+.widget-card:nth-child(3) { animation-delay: 100ms; }
+.widget-card:nth-child(4) { animation-delay: 150ms; }
+.widget-card:nth-child(5) { animation-delay: 200ms; }

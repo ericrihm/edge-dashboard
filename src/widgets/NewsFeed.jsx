@@ -38,7 +38,7 @@ const CATEGORY_COLORS = {
   Tech: '#00e5ff',
 };
 
-export default function NewsFeed({ settings }) {
+export default function NewsFeed({ settings, onOpenSettings }) {
   const feedList = settings.rssFeeds?.length > 0 ? settings.rssFeeds : DEFAULT_FEEDS;
 
   const [articles, setArticles] = useState([]);
@@ -86,7 +86,10 @@ export default function NewsFeed({ settings }) {
       <div className="widget-card">
         <div className="widget-header"><span>News</span></div>
         <div className="widget-content" style={s.emptyMsg}>
-          Add RSS feeds in Settings
+          <p>No RSS feeds configured</p>
+          {onOpenSettings && (
+            <button style={s.onboardingBtn} onClick={onOpenSettings}>Configure Feeds</button>
+          )}
         </div>
       </div>
     );
@@ -289,5 +292,17 @@ const s = {
     fontSize: '0.65rem',
     color: 'var(--warning)',
     cursor: 'help',
+  },
+  onboardingBtn: {
+    background: 'var(--accent)',
+    color: 'var(--bg-primary)',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.8rem',
+    fontWeight: 600,
+    padding: '0.5rem 1.25rem',
+    cursor: 'pointer',
+    marginTop: '0.5rem',
+    transition: 'opacity 0.15s',
   },
 };
