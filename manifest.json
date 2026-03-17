@@ -4,6 +4,10 @@
   "description": "Custom new tab dashboard with weather, news, and productivity widgets",
   "version": "1.0.0",
   "permissions": ["storage"],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },

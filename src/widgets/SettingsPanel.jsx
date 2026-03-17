@@ -8,7 +8,7 @@ const DEFAULT_FEEDS = [
   { url: 'https://feeds.feedburner.com/TheHackersNews', category: 'Cybersecurity', name: 'The Hacker News' },
   { url: 'https://www.bleepingcomputer.com/feed/', category: 'Cybersecurity', name: 'BleepingComputer' },
   { url: 'https://www.cisa.gov/news.xml', category: 'CMMC/GRC', name: 'CISA' },
-  { url: 'https://feeds.arstechnica.com/arstechnica/index', category: 'Tech', name: 'Ars Technica' },
+  { url: 'https://www.darkreading.com/rss.xml', category: 'Cybersecurity', name: 'Dark Reading' },
   { url: 'https://www.theverge.com/rss/index.xml', category: 'Tech', name: 'The Verge' },
 ];
 

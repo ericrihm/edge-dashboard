@@ -50,8 +50,16 @@ function parseAtomEntries(doc, sourceTitle) {
 }
 
 export async function fetchFeed(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const res = await fetch(url, {
+    headers: {
+      'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml, */*',
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+
   const text = await res.text();
   const parser = new DOMParser();
   const doc = parser.parseFromString(text, 'application/xml');
@@ -92,14 +100,20 @@ export async function fetchAllFeeds(feedList) {
     if (results[i].status === 'fulfilled') {
       articles.push(...results[i].value);
     } else {
-      console.warn(`Feed failed: ${feedList[i].url}`, results[i].reason);
-      failures.push(feedList[i].name || feedList[i].url);
+      const reason = results[i].reason?.message || 'Unknown error';
+      console.warn(`Feed failed: ${feedList[i].name} (${feedList[i].url}) — ${reason}`);
+      failures.push({
+        name: feedList[i].name || feedList[i].url,
+        reason,
+      });
     }
   }
 
   articles.sort((a, b) => {
     const da = a.pubDate ? new Date(a.pubDate).getTime() : 0;
     const db = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+    if (isNaN(da)) return 1;
+    if (isNaN(db)) return -1;
     return db - da;
   });
 
