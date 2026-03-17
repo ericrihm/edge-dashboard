@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getSettings } from './settings.js';
 import Weather from './widgets/Weather.jsx';
 import NewsFeed from './widgets/NewsFeed.jsx';
+import SearchBar from './widgets/SearchBar.jsx';
+import QuickLinks from './widgets/QuickLinks.jsx';
 import '../src/styles/widgets.css';
 
 function formatTime(date, format) {
@@ -47,6 +49,18 @@ export default function App() {
         <div style={styles.date}>{formatDate(now)}</div>
       </header>
 
+      {settings && (
+        <div style={styles.searchRow}>
+          <SearchBar settings={settings} onSettingsChange={setSettings} />
+        </div>
+      )}
+
+      {settings && (
+        <div style={styles.quickLinksRow}>
+          <QuickLinks settings={settings} onSettingsChange={setSettings} />
+        </div>
+      )}
+
       <main style={styles.widgetGrid}>
         {settings && <Weather settings={settings} />}
         {settings && <NewsFeed settings={settings} />}
@@ -62,10 +76,13 @@ export default function App() {
 const styles = {
   container: {
     display: 'grid',
-    gridTemplateRows: 'auto 1fr auto',
+    gridTemplateRows: 'auto auto auto 1fr auto',
     minHeight: '100vh',
     padding: '2rem',
-    gap: '2rem',
+    gap: '1.5rem',
+    maxWidth: '1400px',
+    margin: '0 auto',
+    width: '100%',
   },
   header: {
     textAlign: 'center',
@@ -81,11 +98,21 @@ const styles = {
     color: 'var(--text-secondary)',
     marginTop: '0.25rem',
   },
+  searchRow: {
+    maxWidth: '680px',
+    width: '100%',
+    margin: '0 auto',
+  },
+  quickLinksRow: {
+    maxWidth: '680px',
+    width: '100%',
+    margin: '0 auto',
+  },
   widgetGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+    gridTemplateColumns: '1fr 2fr',
     gap: '1.5rem',
-    alignContent: 'start',
+    alignItems: 'start',
   },
   footer: {
     textAlign: 'center',
