@@ -48,7 +48,6 @@ rihmio/
 ├── favicon.ico            # ICO favicon (fallback)
 ├── robots.txt             # Search engine directives
 ├── sitemap.xml            # Sitemap for SEO
-├── CLAUDE.md              # AI assistant context
 └── README.md
 ```
 
